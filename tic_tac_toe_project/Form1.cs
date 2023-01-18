@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.Win32;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.Data;
@@ -6,12 +7,10 @@ using System.Drawing;
 using System.Text;
 using System.Windows.Forms;
 
-namespace tic_tac_toe_project
-{
-    public partial class Form1 : Form
-    {
+namespace tic_tac_toe_project{
+    public partial class Form1 : Form{
+        Label[] buttonArr = new Label[9];
         Random random = new Random();
-        int zufall = 0;
         int k = 0;
         public int xCount = 0;
         public int oCount = 0;
@@ -21,440 +20,211 @@ namespace tic_tac_toe_project
         bool playAgainstComputer = false;
         int drawCount = 0;
         int luckNumber;
-     
-        public Form1()
-        {
+        public Form1(){
             InitializeComponent();
         }
+        //72; 80
 
-        private void Form1_Load(object sender, EventArgs e)
-        {
-            try
-            {
-                resetGameStates();
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show("Error: " + ex.Message);
+        private void Form1_Load(object sender, EventArgs e){
+            autoLoadButtons();
+            //resetGameStates();
+        }
+        void autoLoadButtons(){
+            int size = 100;
+            int border = (this.buttons_panel1.Width - size * 3) / 3;
+            int index = 0;
+            for(int j = 0; j < 3; j++){
+                for (int i = 0; i < 3; i++) {
+                    buttonArr[index] = new Label();
+                    buttonArr[index].Size = new Size(size, size);
+                    buttonArr[index].BackColor = Color.Gray;
+                    buttonArr[index].Tag = index;
+                    buttonArr[index].Location = new Point(i * border + size * i, j * border + size * j);
+                    buttonArr[index].Click += button7_Click;
+                    buttonArr[index].TextAlign = ContentAlignment.MiddleCenter;
+                    buttonArr[index].Font = new Font(buttonArr[index].Font.FontFamily, 20,FontStyle.Bold);
+                    this.buttons_panel1.Controls.Add(buttonArr[index]);
+                    index++;
+                }
             }
         }
-     
-
-      
-        private  void button7_Click(object sender, EventArgs e)
-        {
-            try
-            {
-                Button b = (Button)sender;
-
-
-                if (turn)
-                {
+        private void button7_Click(object sender, EventArgs e){
+            try{
+                Label b = (Label)sender;
+                if (turn){
                     b.Text = "X";
                     turn = false;
-
                 }
-                else if (!turn && playAgainstComputer == false)
-                {
+                else if (!turn && playAgainstComputer == false){
                     b.Text = "O";
                     turn = true;
                 }
                 b.Enabled = false;
-
                 checkGameOver();
             }
-            catch (Exception ex)
-            {
+            catch (Exception ex){
                 MessageBox.Show("Error: " + ex.Message);
             }
         }
-
-       
-
-        void checkButtonsEquals()
-        {
-            //Horizontal
-
-            if (button1.Text == button2.Text && button1.Text == button3.Text && button1.Text != "") { winner = true; }
-            if (button4.Text == button5.Text && button4.Text == button6.Text && button4.Text != "") { winner = true; }
-            if (button7.Text == button8.Text && button7.Text == button9.Text && button7.Text != "") { winner = true; }
-
-            //Vertical
-
-            if (button1.Text == button4.Text && button1.Text == button7.Text && button7.Text != "") { winner = true; }
-            if (button2.Text == button5.Text && button2.Text == button8.Text && button2.Text != "") { winner = true; }
-            if (button3.Text == button6.Text && button3.Text == button9.Text && button3.Text != "") { winner = true; }
-
-            //Diagonal
-
-            if (button1.Text == button5.Text && button1.Text == button9.Text && button1.Text != "") { winner = true; }
-            if (button3.Text == button5.Text && button3.Text == button7.Text && button3.Text != "") { winner = true; }
+        void checkButtonsEquals(){
+            checkHorizontalEqual();
+            checkVerticalEqual();
+            checkDiagonalEqual();
         }
-        public void checkGameOver()
-        {
-
-
-
-
+        void checkHorizontalEqual(){
+            for (int i = 0; i < 9; i+= 3){
+                if(buttonArr[i].Text==buttonArr[i+1].Text&&
+                buttonArr[i].Text == buttonArr[i+2].Text && buttonArr[i].Text != ""){
+                    winner = true;
+                    break;
+                }
+            }
+        }
+        void checkVerticalEqual(){
+            for (int i = 0; i < 3; i ++){
+                if (buttonArr[i].Text == buttonArr[i + 3].Text &&
+                buttonArr[i].Text == buttonArr[i + 6].Text && buttonArr[i].Text != ""){
+                    winner = true;
+                    break;
+                }
+            }
+        }
+        void checkDiagonalEqual(){
+            if (buttonArr[0].Text== buttonArr[4].Text&&
+            buttonArr[0].Text== buttonArr[8].Text && buttonArr[0].Text!=""){
+                winner = true;
+            }
+            if(buttonArr[2].Text== buttonArr[4].Text&& buttonArr[2].Text== buttonArr[6].Text&&
+            buttonArr[2].Text != ""){
+            winner = true;
+            }
+        }
+        public void checkGameOver(){
             k++;
-            
-            //butt
             checkButtonsEquals();
-
-            if (k == 9 && winner == false)
-            {
+            if (k == 9 && winner == false){
                 MessageBox.Show("No Winner");
                 ResetGame();
                 drawCount++;
                 k = 0;
-
                 this.draw_textBox1.Text = drawCount.ToString();
                 return;
             }
-
-            if (!turn && playAgainstComputer && !winner && !(k >= 9))
-            {
-              
+            if (!turn && playAgainstComputer && !winner && !(k >= 9)){
                 Random random = new Random();
                 luckNumber = random.Next(1,10);
-
                 randomButton();
                 checkButtonsEquals();
                 k++;
-               
                 turn = true;
             }
-         
-            if (winner)
-            {
-               if(turn == false)
-                {
+            if (winner){
+               if(turn == false){
                     player = "X";
                     xCount++;
                 }
-
-             
-                if (turn)
-                {
+                if (turn){
                     player = "O";
                     oCount++;
                 }
-              
-
                 MessageBox.Show("The game is over " + player + " has won the Game!");
                 this.X_winds_textBox1.Text = xCount.ToString();
                 this.o_wins_textbox.Text = oCount.ToString();
-               
-
-
-
                 ResetGame();
-
-               
             }
-            
-
-          
-
         }
-           void randomButton()
-        {
-            
-            if (computerKi() == true)
-            {
-                return;
+        void randomButton(){
+            if (buttonArr[4].Enabled){
+                buttonArr[4].Text = "O";
+                buttonArr[4].Enabled = false;
             }
-            else
-            {
-                switch (luckNumber)
-                {
-                    case 1: checkButtonEnabled(button1); break;
-
-
-                    case 2: checkButtonEnabled(button2); break;
-                    case 3: checkButtonEnabled(button3); break;
-                    case 4: checkButtonEnabled(button4); break;
-                    case 5: checkButtonEnabled(button5); break;
-                    case 6: checkButtonEnabled(button6); break;
-                    case 7: checkButtonEnabled(button7); break;
-                    case 8: checkButtonEnabled(button8); break;
-                    case 9: checkButtonEnabled(button9); break;
-                }
+            else{
+                checkButtonEnabled(buttonArr[luckNumber - 1]);
             }
-          
-        }
-        bool computerKi()
-        {
-
-            //Middle Button
-            if (button5.Enabled)
-            {
-                button5.Text = "O";
-                button5.Enabled = false;
-
-                return true;
-            }
-            //Diagonal
-            if (button5.Text == "X" && button9.Text == "X" && button1.Enabled)
-            {
-                button1.Text = "O";
-                button1.Enabled = false;
-                return true;
-            }
-            if (button5.Text == "X" && button1.Text == "X" && button9.Enabled)
-            {
-                button9.Text = "O";
-                button9.Enabled = false;
-                return true;
-            }
-            if (button5.Text == "X" && button3.Text == "X" && button7.Enabled)
-            {
-                button7.Text = "O";
-                button7.Enabled = false;
-                return true;
-            }
-            if (button5.Text == "X" && button7.Text == "X" && button3.Enabled)
-            {
-                button3.Text = "O";
-                button3.Enabled = false;
-                return true;
-            }
-            // Horizontal Middle
-            if (button5.Text == "X" && button6.Text == "X" && button4.Enabled)
-            {
-                button4.Text = "O";
-                button4.Enabled = false;
-                return true;
-            }
-            if (button5.Text == "X" && button4.Text == "X" && button6.Enabled)
-            {
-                button6.Text = "O";
-                button6.Enabled = false;
-                return true;
-            }
-            //Horizontal Top
-            if (button1.Text == "X" && button2.Text == "X" && button3.Enabled)
-            {
-                button3.Text = "O";
-                button3.Enabled = false;
-                return true;
-            }
-            if (button1.Text == "X" && button3.Text == "X" && button2.Enabled)
-            {
-                button2.Text = "O";
-                button2.Enabled = false;
-                return true;
-            }
-            if (button3.Text == "X" && button2.Text == "X" && button1.Enabled)
-            {
-                button1.Text = "O";
-                button1.Enabled = false;
-                return true;
-            }
-            //Horizontal Bottom
-            //Vertical Middle
-            if (button5.Text == "X" && button2.Text == "X" && button8.Enabled)
-            {
-                button8.Text = "O";
-
-                button8.Enabled = false;
-                return true;
-            }
-            if (button5.Text == "X" && button8.Text == "X" && button2.Enabled)
-            {
-                button2.Text = "O";
-                button2.Enabled = false;
-                return true;
-            }
-            // Vertical Left
-            if (button1.Text == "X" && button4.Text == "X" && button7.Enabled)
-            {
-                button7.Text = "O";
-                button7.Enabled = false;
-                return true;
-            }
-            if (button7.Text == "X" && button1.Text == "X" && button4.Enabled)
-            {
-                button4.Text = "O";
-                button4.Enabled = false;
-                return true;
-
-              
-            }
-            if (button7.Text == "X" && button4.Text == "X" && button1.Enabled)
-            {
-                button1.Text = "O";
-                button1.Enabled = false;
-                return true;
-            }
-            //Vertical Right
-            if (button3.Text == "X" && button6.Text == "X" && button9.Enabled)
-            {
-                button9.Text = "O";
-                button9.Enabled = false;
-                return true;
-
-
-            }
-            if (button9.Text == "X" && button3.Text == "X" && button6.Enabled)
-            {
-                button6.Text = "O";
-                button6.Enabled = false;
-                return true;
-            }
-            if (button6.Text == "X" && button9.Text == "X" && button3.Enabled)
-            {
-                button3.Text = "O";
-                button3.Enabled = false;
-                return true;
-            }
-            return false;
-
-            
-
-        }
-        void checkButtonEnabled(Button b)
-        {
-            if (b.Enabled)
-            {
+        } 
+        void checkButtonEnabled(Label b){
+            if (b.Enabled){
                 b.Text = "O";
                 b.Enabled = false;
             }
-            else
-            {
+            else{
                 luckNumber = random.Next(1,10);
                 randomButton();
             }
         }
-             void ResetGame()
-            {
+        void ResetGame(){
             k = 0;
             turn = true;
             winner = false;
-            button1.Enabled = true;
-            button2.Enabled = true;
-            button3.Enabled = true;
-            button4.Enabled = true;
-            button5.Enabled = true;
-            button6.Enabled = true;
-            button7.Enabled = true;
-            button8.Enabled = true;
-            button9.Enabled = true;
-            button1.Text = "";
-            button2.Text = "";
-            button3.Text = "";
-            button4.Text = "";
-            button5.Text = "";
-            button6.Text = "";
-            button7.Text = "";
-            button8.Text = "";
-            button9.Text = "";
-
-
-            k = 0;
+            for (int i = 0; i < buttonArr.Length; i++){
+                buttonArr[i].Enabled = true;
+                buttonArr[i].Text = "";
+            }
         }
-
-        private void label1_Click(object sender, EventArgs e)
-        {
-
+        private void label1_Click(object sender, EventArgs e){
         }
-
-        private void label1_MouseEnter(object sender, EventArgs e)
-        {
-            Button b = (Button)sender;
-            if (b.Enabled)
-            {
+        private void label1_MouseEnter(object sender, EventArgs e){
+            Label b = (Label)sender;
+            if (b.Enabled){
                 if(turn)
                 b.Text = "X";
-
                 if(turn == false)
                     b.Text = "O";
             }
-           
-
         }
-
-        private void button1_MouseHover(object sender, EventArgs e)
-        {
-
+        private void button1_MouseHover(object sender, EventArgs e){
         }
-
-        private void button1_MouseLeave(object sender, EventArgs e)
-        {
-           Button b = (Button)sender;
-            if (b.Enabled)
-            {
+        private void button1_MouseLeave(object sender, EventArgs e){
+           Label b = (Label)sender;
+           if (b.Enabled){
                 b.Text = "";
-            }
+           }
         }
-
-        private void newGameToolStripMenuItem_Click(object sender, EventArgs e)
-        {
+        private void newGameToolStripMenuItem_Click(object sender, EventArgs e){
             ResetGame();
         }
-
-        private void exitToolStripMenuItem_Click(object sender, EventArgs e)
-        {
+        private void exitToolStripMenuItem_Click(object sender, EventArgs e){
             Application.Exit();
         }
-        
-        private void resetToolStripMenuItem_Click(object sender, EventArgs e)
-        {
+        private void resetToolStripMenuItem_Click(object sender, EventArgs e){
             resetGameStates();
             MessageBox.Show("Game Reset");
         }
-
-
-        void resetGameStates()
-        {
+      
+        void resetGameStates(){
             this.draw_textBox1.Text = "0";
             this.X_winds_textBox1.Text = "0";
             this.o_wins_textbox.Text = "0";
             drawCount = 0;
             xCount = 0;
             oCount = 0;
-         
             ResetGame();
-            
         }
-
-        private void new_game_toolStripButton1_Click(object sender, EventArgs e)
-        {
-
+        private void new_game_toolStripButton1_Click(object sender, EventArgs e){
         }
-
-        private void computerToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            try
-            {
+        private void computerToolStripMenuItem_Click(object sender, EventArgs e){
+            try{
                 playAgainstComputer = true;
                 resetGameStates();
             }
-            catch (Exception ex)
-            {
+            catch (Exception ex){
                 MessageBox.Show("Error: " +ex.Message);
             }
         }
-
-        private void playerToolStripMenuItem_Click(object sender, EventArgs e)
-        {
-            try
-            {
+        private void playerToolStripMenuItem_Click(object sender, EventArgs e){
+            try{
                 playAgainstComputer = false;
                 resetGameStates();
             }
-            catch(Exception ex)
-            {
+            catch(Exception ex){
                 MessageBox.Show("Error: " + ex.Message);
             }
         }
 
-        private void blink_Timer_Tick(object sender, EventArgs e)
+        private void buttons_panel1_Paint(object sender, PaintEventArgs e)
         {
-        
-        }
-    }
 
-       
-    }
+        }
+    }       
+}
 
